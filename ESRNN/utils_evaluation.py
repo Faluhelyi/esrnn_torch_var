@@ -309,19 +309,20 @@ def evaluate_panel(y_panel, y_hat_panel, metric,
 
   evaluation = []
   for u_id in y_panel.unique_id.unique():
-    top_row = np.asscalar(y_panel['unique_id'].searchsorted(u_id, 'left'))
-    bottom_row = np.asscalar(y_panel['unique_id'].searchsorted(u_id, 'right'))
+    top_row = np.array(y_panel['unique_id'].searchsorted(u_id, 'left')).item()
+    top_row = np.array(y_panel['unique_id'].searchsorted(u_id, 'left')).item()
+    bottom_row = np.array(y_panel['unique_id'].searchsorted(u_id, 'right')).item()
     y_id = y_panel[top_row:bottom_row].y.to_numpy()
 
-    top_row = np.asscalar(y_hat_panel['unique_id'].searchsorted(u_id, 'left'))
-    bottom_row = np.asscalar(y_hat_panel['unique_id'].searchsorted(u_id, 'right'))
+    top_row = np.array(y_hat_panel['unique_id'].searchsorted(u_id, 'left')).item()
+    bottom_row = np.array(y_hat_panel['unique_id'].searchsorted(u_id, 'right')).item()
     y_hat_id = y_hat_panel[top_row:bottom_row].y_hat.to_numpy()
     assert len(y_id)==len(y_hat_id)
 
     if metric_name == 'mase':
       assert (y_insample is not None) and (seasonality is not None)
-      top_row = np.asscalar(y_insample['unique_id'].searchsorted(u_id, 'left'))
-      bottom_row = np.asscalar(y_insample['unique_id'].searchsorted(u_id, 'right'))
+      top_row = np.array(y_insample['unique_id'].searchsorted(u_id, 'left')).item()
+      bottom_row = np.array(y_insample['unique_id'].searchsorted(u_id, 'right')).item()
       y_insample_id = y_insample[top_row:bottom_row].y.to_numpy()
       evaluation_id = metric(y_id, y_hat_id, y_insample_id, seasonality)
     else:

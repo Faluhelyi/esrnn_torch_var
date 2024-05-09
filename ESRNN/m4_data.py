@@ -113,6 +113,7 @@ def m4_parser(dataset_name, directory, num_obs=1000000):
       len_serie = len_series.iloc[i,1]
       ranges = pd.date_range(start='1970/01/01', periods=len_serie, freq=freq)
       dates += list(ranges)
+  df = df.astype({'ds': 'datetime64[ns]'})
   df.loc[:,'ds'] = dates
 
   df = df.merge(m4_info, left_on=['unique_id'], right_on=['M4id'])
@@ -161,17 +162,18 @@ def naive2_predictions(dataset_name, directory, num_obs, y_train_df = None, y_te
     print('Preparing Naive2 {} dataset predictions'.format(dataset_name))
 
     # Naive2
-    y_naive2_df = pd.DataFrame(columns=['unique_id', 'ds', 'y_hat'])
+    #y_naive2_df = pd.DataFrame(columns=['unique_id', 'ds', 'y_hat'])
 
     # Sort X by unique_id for faster loop
     y_train_df = y_train_df.sort_values(by=['unique_id', 'ds'])
     # List of uniques ids
     unique_ids = y_train_df['unique_id'].unique()
     # Panel of fitted models
+    count = 0
     for unique_id in unique_ids:
         # Fast filter X and y by id.
-        top_row = np.asscalar(y_train_df['unique_id'].searchsorted(unique_id, 'left'))
-        bottom_row = np.asscalar(y_train_df['unique_id'].searchsorted(unique_id, 'right'))
+        top_row = np.array(y_train_df['unique_id'].searchsorted(unique_id, 'left')).item()
+        bottom_row = np.array(y_train_df['unique_id'].searchsorted(unique_id, 'right')).item()
         y_id = y_train_df[top_row:bottom_row]
 
         y_naive2 = pd.DataFrame(columns=['unique_id', 'ds', 'y_hat'])
@@ -179,7 +181,14 @@ def naive2_predictions(dataset_name, directory, num_obs, y_train_df = None, y_te
                                        periods=output_size+1, freq=freq)[1:]
         y_naive2['unique_id'] = unique_id
         y_naive2['y_hat'] = Naive2(seasonality).fit(y_id.y.to_numpy()).predict(output_size)
-        y_naive2_df = y_naive2_df.append(y_naive2)
+
+        if count == 0:
+           y_naive2_df = y_naive2
+            
+        else: 
+          y_naive2_df = pd.concat([y_naive2_df, y_naive2], ignore_index=True)
+
+        count += 1
 
     y_naive2_df = y_test_df.merge(y_naive2_df, on=['unique_id', 'ds'], how='left')
     y_naive2_df.rename(columns={'y_hat': 'y_hat_naive2'}, inplace=True)

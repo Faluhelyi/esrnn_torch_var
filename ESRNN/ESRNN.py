@@ -408,7 +408,7 @@ class ESRNN(object):
     self.min_owa = 4.0
     self.min_epoch = 0
 
-    self.int_ds = isinstance(self.y_train_df['ds'][0], (int, np.int, np.int64))
+    self.int_ds = isinstance(self.y_train_df['ds'][0], (int, int, np.int64))
 
     self.y_hat_benchmark = y_hat_benchmark
 
