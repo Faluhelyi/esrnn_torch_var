@@ -8,7 +8,7 @@ def get_config(dataset_name):
     """
     allowed_dataset_names = ('Yearly', 'Monthly', 'Weekly', 'Hourly', 'Quarterly', 'Daily')
     if dataset_name not in allowed_dataset_names:
-        raise ValueError(f'kind must be one of {allowed_kinds}')
+        raise ValueError(f'kind must be one of {allowed_dataset_names}')
 
     if dataset_name == 'Yearly':
         return YEARLY
